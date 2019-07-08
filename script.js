@@ -88,7 +88,7 @@ class Tower {
   // init the windows of the tower
   initWindows() {
     this.tabWindows = [];
-    this.windowsFill = "hsl(" + this.hue + "deg, 70%, 50%)";
+    this.windowsFill = "hsl(" + this.hue + "deg, 100%, 80%)";
     this.marginLeftRight = randomizeBetween(2, 10);
     this.marginTop = randomizeBetween(2, 50);
     this.marginBottom = randomizeBetween(2, 5);
@@ -165,7 +165,7 @@ class Pencil {
   // init the number of the towers
   init(nbTower = 10) {
     this.layer1 = new Layer("lay1");
-    this.layer2 = new Layer("lay2", "rgba(50, 50, 50, 0.8)");
+    this.layer2 = new Layer("lay2", "rgba(50, 50, 50, 0.6)");
     this.layer1.clearCanvas();
     this.layer2.clearCanvas();
 
