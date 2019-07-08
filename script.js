@@ -7,9 +7,9 @@ function randomizeBetween(value1, value2) {
 class Layer {
 
   // The parameter is the HTML attribute "id" for the canvas.
-  constructor(id, backgroundColor = "rgb(50, 50, 50)") {
+  constructor(id) {
     this.id = id;
-    this.backgroundColor = backgroundColor;
+    //this.backgroundColor = backgroundColor;
   }
 
   // force to add a new canvas tag in the body
@@ -20,7 +20,7 @@ class Layer {
     // default values
     canvasModel.setAttribute("width", "300px");
     canvasModel.setAttribute("height", "300px");
-    canvasModel.style.backgroundColor = this.backgroundColor;
+    //canvasModel.style.backgroundColor = this.backgroundColor;
 
     this.setCanvasFitScreen();
     return document.querySelector("canvas#" + this.id);
@@ -160,23 +160,38 @@ class Pencil {
   //
   constructor() {
     this.tabTower = [];
+    this.tabLayer = [];
   }
 
   // init the number of the towers
   init(nbTower = 10) {
-    this.layer1 = new Layer("lay1");
-    this.layer2 = new Layer("lay2", "rgba(50, 50, 50, 0.6)");
-    this.layer1.clearCanvas();
-    this.layer2.clearCanvas();
 
-    var nbLayers = 2;
-    var myLayer = this.layer1;
+    this.deleteAllCanvas();
+
+    let nbLayers = Math.floor(randomizeBetween(2, 6));
+
+    for (let i = 0 ; i < nbLayers ; i ++) {
+      this.tabLayer[i] = new Layer("layer" + i);
+      this.tabLayer[i].clearCanvas();
+    }
+
+    var myLayerLevel = 0;
+    var nbTowersByLayer = nbTower / nbLayers;
     for (let i = 0; i < nbTower; i++) {
 
-      if (i > (nbTower / nbLayers)) {
-        myLayer = this.layer2;
+      if (i > (nbTowersByLayer * (1 + myLayerLevel))) {
+        myLayerLevel++;
       }
-      this.tabTower[i] = new Tower(myLayer);
+
+      this.tabTower[i] = new Tower(this.tabLayer[myLayerLevel]);
+    }
+  }
+
+  // delete all canvas
+  deleteAllCanvas() {
+    let listCanvasToDelete = document.querySelectorAll("canvas");
+    for (let i = 0 ; i < listCanvasToDelete.length ; i++) {
+      listCanvasToDelete[i].remove();
     }
   }
 
