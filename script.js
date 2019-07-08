@@ -5,10 +5,11 @@ function randomizeBetween(value1, value2) {
 
 // a Layer is a canvas to draw something on it.
 class Layer {
-            
+
   // The parameter is the HTML attribute "id" for the canvas.
-  constructor(id) {
+  constructor(id, backgroundColor = "rgb(50, 50, 50)") {
     this.id = id;
+    this.backgroundColor = backgroundColor;
   }
 
   // force to add a new canvas tag in the body
@@ -19,7 +20,8 @@ class Layer {
     // default values
     canvasModel.setAttribute("width", "300px");
     canvasModel.setAttribute("height", "300px");
-    
+    canvasModel.style.backgroundColor = this.backgroundColor;
+
     this.setCanvasFitScreen();
     return document.querySelector("canvas#" + this.id);
   }
@@ -48,7 +50,7 @@ class Layer {
   clearCanvas() {
     this.getContext().clearRect(
       0,
-      0, 
+      0,
       this.getContext().canvas.width,
       this.getContext().canvas.height);
   }
@@ -62,7 +64,7 @@ class Tower {
     this.ctx = layer.getContext();
 
     let margin = -20;
-    
+
     let minWidth = 50;
     let maxWidth = 200;
     let minHeight = this.ctx.canvas.height / 4;
@@ -79,10 +81,10 @@ class Tower {
 
     this.hue = randomizeBetween(0, 360);
     this.fill = "hsl(" + this.hue + "deg, 40%, 20%)";
-    
+
     this.initWindows();
   }
-  
+
   // init the windows of the tower
   initWindows() {
     this.tabWindows = [];
@@ -90,13 +92,13 @@ class Tower {
     this.marginLeftRight = randomizeBetween(2, 10);
     this.marginTop = randomizeBetween(2, 50);
     this.marginBottom = randomizeBetween(2, 5);
-    
+
     this.windowWidth = randomizeBetween(3, 20);
     this.windowHeight = randomizeBetween(3, 20);
-    
+
     this.nbWindowsX = this.calcNbWindowsX();
     this.nbWindowsY = this.calcNbWindowsY();
-    
+
     // default value : all windows are switched on
     for (let ix = 0 ; ix < this.nbWindowsX ; ix ++) {
       this.tabWindows[ix] = [];
@@ -104,22 +106,22 @@ class Tower {
         this.tabWindows[ix][jy] = true;
       }
     }
-    
+
   }
-  
+
   // calculate the number of windows to display on X-axis
   calcNbWindowsX( ) {
     let nbWindowsXMin = 2;
     let nbWindowsXMax = Math.floor((this.width - (2 * this.marginLeftRight)) / this.windowWidth);
-    
+
     return Math.floor(randomizeBetween(nbWindowsXMin, nbWindowsXMax));
   }
-  
+
   // calculate the number of windows to display on Y-axis
   calcNbWindowsY() {
     let nbWindowsYMin = 2;
     let nbWindowsYMax = Math.floor((this.height - this.marginTop - this.marginBottom) / this.windowHeight);
-    
+
     return Math.floor(randomizeBetween(nbWindowsYMin, nbWindowsYMax));
   }
 
@@ -128,10 +130,10 @@ class Tower {
     this.ctx.fillStyle = this.fill;
     this.ctx.fillRect(this.x, this.y, this.width, -this.height);
   }
-  
+
   drawWindows() {
     this.ctx.fillStyle = this.windowsFill;
-    
+
     let interX = (this.width - (2 * this.marginLeftRight) - (this.windowWidth * this.tabWindows.length)) / (this.tabWindows.length - 1);
     let interY = (this.height - (this.marginTop + this.marginBottom) - (this.windowHeight * this.tabWindows[0].length)) / (this.tabWindows[0].length - 1);
 
@@ -141,9 +143,9 @@ class Tower {
         if (!this.tabWindows[ix][jy]) {
           continue;
         }
-        
+
         let xWin = this.x + this.marginLeftRight + (ix * (this.windowWidth + interX));
-        
+
         let yWin = this.y - this.marginBottom - (jy * (this.windowHeight + interY));
 
         this.ctx.fillRect(xWin, yWin, this.windowWidth, -this.windowHeight);
@@ -163,15 +165,24 @@ class Pencil {
   // init the number of the towers
   init(nbTower = 10) {
     this.layer1 = new Layer("lay1");
+    this.layer2 = new Layer("lay2", "rgba(50, 50, 50, 0.8)");
     this.layer1.clearCanvas();
+    this.layer2.clearCanvas();
+
+    var nbLayers = 2;
+    var myLayer = this.layer1;
     for (let i = 0; i < nbTower; i++) {
-      this.tabTower[i] = new Tower(this.layer1);
+
+      if (i > (nbTower / nbLayers)) {
+        myLayer = this.layer2;
+      }
+      this.tabTower[i] = new Tower(myLayer);
     }
   }
 
   // draw the towers on the layers
   draw() {
-    var ctx = this.layer1.getContext();
+    //var ctx = this.layer1.getContext();
 
     for (let i = 0; i < this.tabTower.length; i++) {
       this.tabTower[i].draw();
@@ -197,4 +208,4 @@ function redraw() {
   pen.draw();
 }
 
-(redraw())();
+redraw();
