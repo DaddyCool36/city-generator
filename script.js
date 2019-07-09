@@ -207,8 +207,8 @@ class Pencil {
 }
 
 var config = {
-  number_of_towers : 20,
-}
+  numberOfTowers : 20,
+};
 
 
 
