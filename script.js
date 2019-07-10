@@ -4,6 +4,8 @@ var config = {
   mouseY : 0,
   centerX : document.body.clientWidth / 2,
   deltaX : 0,
+  translateXMax : 100,
+  //amplitudeX :
 };
 
 // shorcut for random values between 2 numbers.
@@ -51,17 +53,25 @@ class Layer {
 
   // Force the canvas to resize it to fit screen dimensions (window)
   setCanvasFitScreen() {
-    this.getContext().canvas.width = window.innerWidth;
-    this.getContext().canvas.height = window.innerHeight;
+    let myCanvas = this.getContext().canvas;
+    myCanvas.width = window.innerWidth;
+    myCanvas.height = window.innerHeight;
   }
 
-  // I don't know if this will be useful or not to animate.
+  // Clear the canvas
   clearCanvas() {
-    this.getContext().clearRect(
+    let myContext = this.getContext()
+    myContext.clearRect(
       0,
       0,
-      this.getContext().canvas.width,
-      this.getContext().canvas.height);
+      myContext.canvas.width,
+      myContext.canvas.height);
+  }
+
+  // Move the canvas to the new position
+  translateCanvas(newX, newY) {
+    let myCanvas = this.getContext().canvas;
+    myCanvas.style.left = newX + "px";
   }
 }
 
@@ -72,7 +82,7 @@ class Tower {
   constructor(layer) {
     this.ctx = layer.getContext();
 
-    let margin = -20;
+    let margin = config.translateXMax;
 
     let minWidth = 50;
     let maxWidth = 200;
@@ -83,8 +93,8 @@ class Tower {
     this.height = randomizeBetween(minHeight, maxHeight);
 
     this.x = randomizeBetween(
-      margin,
-      this.ctx.canvas.width - margin - this.width
+      -margin,
+      this.ctx.canvas.width + margin - this.width
     );
     this.y = this.ctx.canvas.height;
 
@@ -213,36 +223,40 @@ class Pencil {
       this.tabTower[i].drawWindows();
     }
   }
-
-  hover(event) {
-    if (event == null) {
-      return;
-    }
-    config.mouseX = event.clientX;
-    config.mouseY = event.clientY;
-    config.deltaX = config.mouseX - config.centerX;
-  }
 }
 
-
+var pen = new Pencil();
 
 function redraw() {
-  var pen = new Pencil();
+
   pen.init(config.numberOfTowers);
   pen.draw();
 
   document
     .querySelector("div#main")
-    .addEventListener ('mousemove', pen.hover);
+    .addEventListener ('mousemove', mouseOverMain);
+}
+
+function mouseOverMain(event) {
+  if (event == null) {
+    return;
+  }
+  config.mouseX = event.clientX;
+  config.mouseY = event.clientY;
+  let deltaX = config.mouseX - config.centerX;
+
+  var moveHigherX = deltaX / config.translateXMax * 40;
+  for (let i = 0, tabLength = pen.tabLayer.length ; i < tabLength ; i ++) {
+
+    let moveX = Math.floor(moveHigherX / (tabLength - i + 1));
+    pen.tabLayer[i].translateCanvas(- moveX);
+  }
+
 }
 
 let gui = new dat.GUI();
 //gui.remember(config);
 gui.add(config, "numberOfTowers").min(2).max(100);
-gui.add(config, "mouseX").listen();
-gui.add(config, "mouseY").listen();
-gui.add(config, "centerX");
-gui.add(config, "deltaX").listen();
 gui.add(this, "redraw");
 
 redraw();
