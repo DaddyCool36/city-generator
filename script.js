@@ -60,7 +60,7 @@ class Layer {
 
   // Clear the canvas
   clearCanvas() {
-    let myContext = this.getContext()
+    let myContext = this.getContext();
     myContext.clearRect(
       0,
       0,
@@ -246,16 +246,6 @@ class Pencil {
 
 var pen = new Pencil();
 
-function redraw() {
-
-  pen.init(config.numberOfTowers);
-  pen.draw();
-
-  document
-    .querySelector("div#main")
-    .addEventListener ('mousemove', mouseOverMain);
-}
-
 function mouseOverMain(event) {
   if (event == null) {
     return;
@@ -272,6 +262,18 @@ function mouseOverMain(event) {
   }
 
 }
+
+function redraw() {
+
+  pen.init(config.numberOfTowers);
+  pen.draw();
+
+  document
+    .querySelector("div#main")
+    .addEventListener ("mousemove", mouseOverMain);
+}
+
+
 
 let gui = new dat.GUI();
 //gui.remember(config);
