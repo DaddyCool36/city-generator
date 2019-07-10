@@ -206,15 +206,15 @@ class Pencil {
   }
 }
 
-let config = {
-  numberOfTowers : 20,
-};
-
 function redraw() {
   let pen = new Pencil();
   pen.init(config.numberOfTowers);
   pen.draw();
 }
+
+let config = {
+  numberOfTowers : 20,
+};
 
 let gui = new dat.GUI();
 //gui.remember(config);
