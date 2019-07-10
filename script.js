@@ -182,34 +182,53 @@ class Pencil {
     this.tabLayer = [];
   }
 
-  // init the number of the towers
+  // init the towers on the layers
   init(nbTower = 10) {
 
     this.deleteAllCanvas();
+    this.tabTower = [];
+    this.tabLayer = [];
 
-    let nbLayers = Math.floor(randomizeBetween(2, 6));
+    nbTower = Math.floor(nbTower);
 
+    let nbLayers = Math.floor(randomizeBetween(3, 6));
+
+    this.initLayers(nbLayers);
+
+    this.initAndDistribTowersOnLayers(nbTower, nbLayers);
+  }
+
+  // Init and clean the layers
+  initLayers(nbLayers) {
     for (let i = 0 ; i < nbLayers ; i ++) {
       this.tabLayer[i] = new Layer("layer" + i);
       this.tabLayer[i].clearCanvas();
     }
+  }
 
-    var myLayerLevel = 0;
-    var nbTowersByLayer = nbTower / nbLayers;
-    for (let i = 0; i < nbTower; i++) {
+  // Init the towers distributed on the layers
+  initAndDistribTowersOnLayers(nbTowers, nbLayers) {
+    var currentLayerLevel = 0;
+    var nbTowersByLayer = Math.floor(nbTowers / nbLayers);
 
-      if (i > (nbTowersByLayer * (1 + myLayerLevel))) {
-        myLayerLevel++;
+    for (let i = 0; i < nbTowers; i++) {
+
+      if (i > (nbTowersByLayer * (1 + currentLayerLevel))) {
+        currentLayerLevel++;
+        if (currentLayerLevel > (nbLayers - 1)) {
+          currentLayerLevel = nbLayers - 1;
+        }
       }
 
-      this.tabTower[i] = new Tower(this.tabLayer[myLayerLevel]);
+      this.tabTower[i] = new Tower(this.tabLayer[currentLayerLevel]);
     }
   }
 
   // delete all canvas
   deleteAllCanvas() {
     let listCanvasToDelete = document.querySelectorAll("canvas");
-    for (let i = 0 ; i < listCanvasToDelete.length ; i++) {
+    let listLength = listCanvasToDelete.length;
+    for (let i = 0 ; i < listLength ; i++) {
       listCanvasToDelete[i].remove();
     }
   }
@@ -245,10 +264,10 @@ function mouseOverMain(event) {
   config.mouseY = event.clientY;
   let deltaX = config.mouseX - config.centerX;
 
-  var moveHigherX = deltaX / config.translateXMax * 40;
+  var moveHighestX = deltaX / config.translateXMax * 40;
   for (let i = 0, tabLength = pen.tabLayer.length ; i < tabLength ; i ++) {
 
-    let moveX = Math.floor(moveHigherX / (tabLength - i + 1));
+    let moveX = Math.floor(moveHighestX / (tabLength - i + 1));
     pen.tabLayer[i].translateCanvas(- moveX);
   }
 
