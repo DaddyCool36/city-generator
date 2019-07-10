@@ -1,3 +1,11 @@
+var config = {
+  numberOfTowers : 20,
+  mouseX : 0,
+  mouseY : 0,
+  centerX : document.body.clientWidth / 2,
+  deltaX : 0,
+};
+
 // shorcut for random values between 2 numbers.
 function randomizeBetween(value1, value2) {
   return Math.abs(value2 - value1) * Math.random() + value1;
@@ -15,7 +23,8 @@ class Layer {
   // force to add a new canvas tag in the body
   generateCanvas() {
     let canvasModel = document.createElement("canvas");
-    document.body.appendChild(canvasModel);
+    let mainDiv = document.querySelector("div#main");
+    mainDiv.appendChild(canvasModel);
     canvasModel.setAttribute("id", this.id);
     // default values
     canvasModel.setAttribute("width", "300px");
@@ -204,21 +213,36 @@ class Pencil {
       this.tabTower[i].drawWindows();
     }
   }
+
+  hover(event) {
+    if (event == null) {
+      return;
+    }
+    config.mouseX = event.clientX;
+    config.mouseY = event.clientY;
+    config.deltaX = config.mouseX - config.centerX;
+  }
 }
+
+
 
 function redraw() {
-  let pen = new Pencil();
+  var pen = new Pencil();
   pen.init(config.numberOfTowers);
   pen.draw();
-}
 
-let config = {
-  numberOfTowers : 20,
-};
+  document
+    .querySelector("div#main")
+    .addEventListener ('mousemove', pen.hover);
+}
 
 let gui = new dat.GUI();
 //gui.remember(config);
-gui.add(config, "numberOfTowers").min(1).max(100);
+gui.add(config, "numberOfTowers").min(2).max(100);
+gui.add(config, "mouseX").listen();
+gui.add(config, "mouseY").listen();
+gui.add(config, "centerX");
+gui.add(config, "deltaX").listen();
 gui.add(this, "redraw");
 
 redraw();
