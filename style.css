@@ -1,15 +1,14 @@
-body{
+body {
   margin: 0;
   padding: 0;
   background-color: black;
-    color: gray;
-    overflow: hidden;
+  color: gray;
+  overflow: hidden;
 }
 
 canvas {
   margin: 0;
   padding: 0;
-  background-color: rgb(50, 50, 50);
   position: absolute;
   z-index: -1;
 }
