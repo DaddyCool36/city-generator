@@ -1,9 +1,9 @@
-body{
+body {
   margin: 0;
   padding: 0;
   background-color: black;
-    color: gray;
-    overflow: hidden;
+  color: gray;
+  overflow: hidden;
 }
 
 canvas {
@@ -11,5 +11,4 @@ canvas {
   padding: 0;
   position: absolute;
   z-index: -1;
-  background-color: rgba(0, 0, 0, 0.3);
 }
