@@ -10,9 +10,9 @@ function randomizeBetween(value1, value2) {
 
 /** default configuration, editable. */
 var editableConfig = {
-   numberOfTowers : 20,
-   amplitudeXMax : 2000,
-   nbLayers : Math.floor(randomizeBetween(3, 6)),
+   numberOfTowers : 40,
+   amplitudeXMax : 200,
+   nbLayers : 6,
 };
 
 /* a Layer is a canvas to draw something on it. */
