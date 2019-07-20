@@ -1,7 +1,7 @@
 /** default configuration, editable. */
 var editableConfig = {
    numberOfTowers : 20,
-   amplitudeXMax : 400,
+   amplitudeXMax : 2000,
    nbLayers : Math.floor(randomizeBetween(3, 6)),
 };
 /** default constants */
@@ -254,11 +254,11 @@ function mouseOverMain(event) {
    let mouseY = event.clientY;
    let deltaX = mouseX - DEFAULT.centerX;
 
-   var moveHighestX = deltaX * 100 / editableConfig.amplitudeXMax;
+   var moveHighestX = (deltaX / DEFAULT.centerX) * editableConfig.amplitudeXMax;
    for (let i = 0, tabLength = pen.tabLayer.length ; i < tabLength ; i ++) {
 
       let moveX = Math.floor(moveHighestX / (tabLength - i + 1));
-      pen.tabLayer[i].translateCanvas(- moveX);
+      pen.tabLayer[i].translateCanvas(- moveX - editableConfig.amplitudeXMax);
    }
 
 }
