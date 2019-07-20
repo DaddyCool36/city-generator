@@ -201,8 +201,8 @@ class Pencil {
    // Init and clean the layers
    initLayers(nbLayers) {
       for (let i = 0 ; i < nbLayers ; i ++) {
-         this.tabLayer[i] = new Layer("layer" + i);
-         this.tabLayer[i].clearCanvas();
+         this.tabLayer[Number(i)] = new Layer("layer" + i);
+         this.tabLayer[Number(i)].clearCanvas();
       }
    }
 
@@ -220,7 +220,7 @@ class Pencil {
             }
          }
 
-         this.tabTower[i] = new Tower(this.tabLayer[currentLayerLevel]);
+         this.tabTower[Number(i)] = new Tower(this.tabLayer[Number(currentLayerLevel)]);
       }
    }
 
@@ -229,7 +229,7 @@ class Pencil {
       let listCanvasToDelete = document.querySelectorAll("canvas");
       let listLength = listCanvasToDelete.length;
       for (let i = 0 ; i < listLength ; i++) {
-         listCanvasToDelete[i].remove();
+         listCanvasToDelete[Number(i)].remove();
       }
    }
 
@@ -238,8 +238,8 @@ class Pencil {
       //var ctx = this.layer1.getContext();
 
       for (let i = 0; i < this.tabTower.length; i++) {
-         this.tabTower[i].draw();
-         this.tabTower[i].drawWindows();
+         this.tabTower[Number(i)].draw();
+         this.tabTower[Number(i)].drawWindows();
       }
    }
 }
@@ -258,7 +258,7 @@ function mouseOverMain(event) {
    for (let i = 0, tabLength = pen.tabLayer.length ; i < tabLength ; i ++) {
 
       let moveX = Math.floor(moveHighestX / (tabLength - i + 1));
-      pen.tabLayer[i].translateCanvas(- moveX - editableConfig.amplitudeXMax);
+      pen.tabLayer[Number(i)].translateCanvas(- moveX - editableConfig.amplitudeXMax);
    }
 
 }
