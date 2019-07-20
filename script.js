@@ -55,7 +55,7 @@ class Layer {
    // Force the canvas to resize it to fit screen dimensions (window)
    setCanvasFitScreen() {
       let myCanvas = this.getContext().canvas;
-      myCanvas.width = window.innerWidth + (editableConfig.amplitudeXMax * 2);
+      myCanvas.width = window.innerWidth + (editableConfig.amplitudeXMax );
       myCanvas.height = window.innerHeight;
       myCanvas.style.left = (-editableConfig.amplitudeXMax) + "px";
    }
@@ -122,9 +122,9 @@ class Tower {
 
       // default value : all windows are switched on
       for (let ix = 0 ; ix < this.nbWindowsX ; ix ++) {
-         this.tabWindows[ix] = [];
+         this.tabWindows[Number(ix)] = [];
          for (let jy = 0 ; jy < this.nbWindowsY ; jy ++) {
-            this.tabWindows[ix][jy] = true;
+            this.tabWindows[Number(ix)][Number(jy)] = true;
          }
       }
 
@@ -160,8 +160,8 @@ class Tower {
 
       for (let ix = 0 ; ix < this.tabWindows.length ; ix ++) {
 
-         for (let jy = 0 ; jy < this.tabWindows[ix].length ; jy ++) {
-            if (!this.tabWindows[ix][jy]) {
+         for (let jy = 0 ; jy < this.tabWindows[Number(ix)].length ; jy ++) {
+            if (!this.tabWindows[Number(ix)][Number(jy)]) {
                continue;
             }
 
