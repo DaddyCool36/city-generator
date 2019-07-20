@@ -1,18 +1,19 @@
+/** default constants */
+const DEFAULT = {
+   centerX : document.body.clientWidth / 2,
+};
+
+/* Return a random value between value1 and value2 */
+function randomizeBetween(value1, value2) {
+   return Math.abs(value2 - value1) * Math.random() + value1;
+}
+
 /** default configuration, editable. */
 var editableConfig = {
    numberOfTowers : 20,
    amplitudeXMax : 2000,
    nbLayers : Math.floor(randomizeBetween(3, 6)),
 };
-/** default constants */
-const DEFAULT = {
-   centerX : document.body.clientWidth / 2,
-}
-
-/* Return a random value between value1 and value2 */
-function randomizeBetween(value1, value2) {
-   return Math.abs(value2 - value1) * Math.random() + value1;
-}
 
 /* a Layer is a canvas to draw something on it. */
 class Layer {
