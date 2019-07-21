@@ -1,6 +1,7 @@
 /** default constants */
 const DEFAULT = {
-   centerX : document.body.clientWidth / 2,
+   centerX : window.innerWidth / 2,
+   centerY : window.innerHeight / 2,
 };
 
 /* Return a random value between value1 and value2 */
@@ -12,6 +13,7 @@ function randomizeBetween(value1, value2) {
 var editableConfig = {
    numberOfTowers : 40,
    amplitudeXMax : 200,
+   amplitudeYMax : 130,
    nbLayers : 6,
 };
 
@@ -21,7 +23,6 @@ class Layer {
    // The parameter is the HTML attribute "id" for the canvas.
    constructor(id) {
       this.id = id;
-      //this.backgroundColor = backgroundColor;
    }
 
    // force to add a new canvas tag in the body
@@ -33,7 +34,6 @@ class Layer {
       // default values
       canvasModel.setAttribute("width", "300px");
       canvasModel.setAttribute("height", "300px");
-      //canvasModel.style.backgroundColor = this.backgroundColor;
 
       this.setCanvasFitScreen();
       return document.querySelector("canvas#" + this.id);
@@ -56,9 +56,10 @@ class Layer {
    // Force the canvas to resize it to fit screen dimensions (window)
    setCanvasFitScreen() {
       let myCanvas = this.getContext().canvas;
-      myCanvas.width = window.innerWidth + (editableConfig.amplitudeXMax );
-      myCanvas.height = window.innerHeight;
-      myCanvas.style.left = (-editableConfig.amplitudeXMax) + "px";
+      myCanvas.width = window.innerWidth + editableConfig.amplitudeXMax;
+      myCanvas.height = window.innerHeight + editableConfig.amplitudeYMax;
+      myCanvas.style.left = (-editableConfig.amplitudeXMax / 2) + "px";
+      myCanvas.style.top = (-editableConfig.amplitudeYMax / 2) + "px";
    }
 
    // Clear the canvas
@@ -75,6 +76,7 @@ class Layer {
    translateCanvas(newX, newY) {
       let myCanvas = this.getContext().canvas;
       myCanvas.style.left = newX + "px";
+      myCanvas.style.top = newY + "px";
    }
 }
 
@@ -102,7 +104,7 @@ class Tower {
       this.y = this.ctx.canvas.height;
 
       this.hue = randomizeBetween(0, 360);
-      this.fill = "hsl(" + this.hue + "deg, 40%, 20%)";
+      this.fill = "hsl(" + this.hue + "deg, 30%, 10%)";
 
       this.initWindows();
    }
@@ -176,34 +178,78 @@ class Tower {
    }
 }
 
-// the Pencil will draw all the towers in all the layers.
+class Fog {
+
+   // initiate the Fog on the layer
+   constructor(layer) {
+      this.ctx = layer.getContext();
+
+      let hue = 0;
+      let altitude1 = randomizeBetween(0.7, 0.9);
+      let altitude2 = randomizeBetween(0.9, 0.97);
+
+      this.gradient = this.ctx.createLinearGradient(
+            0,
+            0,
+            0,
+            this.ctx.canvas.height);
+      this.gradient.addColorStop(0,          "hsla(" + hue + "deg, 0%, 20%, 0)");
+      this.gradient.addColorStop(0.5,        "hsla(" + hue + "deg, 0%, 20%, 0)");
+      this.gradient.addColorStop(altitude1,  "hsla(" + hue + "deg, 100%, 100%, 0.02)");
+      this.gradient.addColorStop(altitude2,  "hsla(" + hue + "deg, 100%, 100%, 0.1)");
+      this.gradient.addColorStop(1,          "hsla(" + hue + "deg, 100%, 100%, 0.3)");
+
+   }
+
+   // draw the Tower in the context set by the constructor.
+   draw() {
+      this.ctx.fillStyle = this.gradient;
+      this.ctx.fillRect(
+            0,
+            0,
+            this.ctx.canvas.width,
+            this.ctx.canvas.height);
+   }
+}
+
+// the Pencil will draw the towers and the fog alternatively on all the layers.
 class Pencil {
 
    //
    constructor() {
       this.tabTower = [];
+      this.tabFog = [];
       this.tabLayer = [];
    }
 
    // init the towers on the layers
-   init(nbTower = 10) {
+   init(nbTowers = 10) {
 
       this.deleteAllCanvas();
       this.tabTower = [];
+      this.tabFog = [];
       this.tabLayer = [];
 
-      nbTower = Math.floor(nbTower);
+      nbTowers = Math.floor(nbTowers);
 
       this.initLayers(editableConfig.nbLayers);
+      this.initFog();
 
-      this.initAndDistribTowersOnLayers(nbTower, editableConfig.nbLayers);
+      this.initAndDistribTowersOnLayers(nbTowers, editableConfig.nbLayers);
    }
 
    // Init and clean the layers
-   initLayers(nbLayers) {
-      for (let i = 0 ; i < nbLayers ; i ++) {
+   initLayers(nbLayersOfTowers) {
+      for (let i = 0 ; i < (nbLayersOfTowers * 2) ; i ++) {
          this.tabLayer[Number(i)] = new Layer("layer" + i);
          this.tabLayer[Number(i)].clearCanvas();
+      }
+   }
+
+   initFog() {
+      let nbLayersOfFog = this.tabLayer.length / 2;
+      for (let i = 0 ; i < nbLayersOfFog ; i ++) {
+         this.tabFog[Number(i)] = new Fog(this.tabLayer[Number((i * 2) + 1)]);
       }
    }
 
@@ -215,13 +261,14 @@ class Pencil {
       for (let i = 0; i < nbTowers; i++) {
 
          if (i > (nbTowersByLayer * (1 + currentLayerLevel))) {
-            currentLayerLevel++;
+
+            currentLayerLevel++ ;
             if (currentLayerLevel > (nbLayers - 1)) {
                currentLayerLevel = nbLayers - 1;
             }
          }
+         this.tabTower[Number(i)] = new Tower(this.tabLayer[Number(currentLayerLevel * 2)]);
 
-         this.tabTower[Number(i)] = new Tower(this.tabLayer[Number(currentLayerLevel)]);
       }
    }
 
@@ -234,13 +281,17 @@ class Pencil {
       }
    }
 
-   // draw the towers on the layers
+   // draw the layers
    draw() {
       //var ctx = this.layer1.getContext();
 
       for (let i = 0; i < this.tabTower.length; i++) {
          this.tabTower[Number(i)].draw();
          this.tabTower[Number(i)].drawWindows();
+      }
+
+      for (var i = 0; i < this.tabFog.length; i++) {
+         this.tabFog[Number(i)].draw();
       }
    }
 }
@@ -253,13 +304,20 @@ function mouseOverMain(event) {
    }
    let mouseX = event.clientX;
    let mouseY = event.clientY;
+
    let deltaX = mouseX - DEFAULT.centerX;
+   let deltaY = mouseY - DEFAULT.centerY;
 
    var moveHighestX = (deltaX / DEFAULT.centerX) * editableConfig.amplitudeXMax;
+   var moveHighestY = (deltaY / DEFAULT.centerY) * editableConfig.amplitudeYMax;
    for (let i = 0, tabLength = pen.tabLayer.length ; i < tabLength ; i ++) {
 
       let moveX = Math.floor(moveHighestX / (tabLength - i + 1));
-      pen.tabLayer[Number(i)].translateCanvas(- moveX - editableConfig.amplitudeXMax);
+      let moveY = Math.floor(moveHighestY / (tabLength - i + 1));
+      pen.tabLayer[Number(i)].translateCanvas(
+         - moveX - (editableConfig.amplitudeXMax / 2),
+         - moveY - (editableConfig.amplitudeYMax / 2)
+      );
    }
 
 }
@@ -281,6 +339,7 @@ let gui = new dat.GUI();
 gui.add(editableConfig, "numberOfTowers").min(2).max(100).step(1);
 gui.add(editableConfig, "nbLayers").min(2).max(10).step(1);
 gui.add(editableConfig, "amplitudeXMax").min(0).max(500).step(10);
+gui.add(editableConfig, "amplitudeYMax").min(0).max(500).step(10);
 gui.add(this, "redraw");
 
 redraw();
