@@ -1,6 +1,7 @@
 /** default constants */
 const DEFAULT = {
-   centerX : document.body.clientWidth / 2,
+   centerX : window.innerWidth / 2,
+   centerY : window.innerHeight / 2,
 };
 
 /* Return a random value between value1 and value2 */
@@ -12,6 +13,7 @@ function randomizeBetween(value1, value2) {
 var editableConfig = {
    numberOfTowers : 40,
    amplitudeXMax : 200,
+   amplitudeYMax : 130,
    nbLayers : 6,
 };
 
@@ -56,9 +58,10 @@ class Layer {
    // Force the canvas to resize it to fit screen dimensions (window)
    setCanvasFitScreen() {
       let myCanvas = this.getContext().canvas;
-      myCanvas.width = window.innerWidth + (editableConfig.amplitudeXMax );
-      myCanvas.height = window.innerHeight;
-      myCanvas.style.left = (-editableConfig.amplitudeXMax) + "px";
+      myCanvas.width = window.innerWidth + editableConfig.amplitudeXMax;
+      myCanvas.height = window.innerHeight + editableConfig.amplitudeYMax;
+      myCanvas.style.left = (-editableConfig.amplitudeXMax / 2) + "px";
+      myCanvas.style.top = (-editableConfig.amplitudeYMax / 2) + "px";
    }
 
    // Clear the canvas
@@ -75,6 +78,7 @@ class Layer {
    translateCanvas(newX, newY) {
       let myCanvas = this.getContext().canvas;
       myCanvas.style.left = newX + "px";
+      myCanvas.style.top = newY + "px";
    }
 }
 
@@ -253,13 +257,20 @@ function mouseOverMain(event) {
    }
    let mouseX = event.clientX;
    let mouseY = event.clientY;
+
    let deltaX = mouseX - DEFAULT.centerX;
+   let deltaY = mouseY - DEFAULT.centerY;
 
    var moveHighestX = (deltaX / DEFAULT.centerX) * editableConfig.amplitudeXMax;
+   var moveHighestY = (deltaY / DEFAULT.centerY) * editableConfig.amplitudeYMax;
    for (let i = 0, tabLength = pen.tabLayer.length ; i < tabLength ; i ++) {
 
       let moveX = Math.floor(moveHighestX / (tabLength - i + 1));
-      pen.tabLayer[Number(i)].translateCanvas(- moveX - editableConfig.amplitudeXMax);
+      let moveY = Math.floor(moveHighestY / (tabLength - i + 1));
+      pen.tabLayer[Number(i)].translateCanvas(
+         - moveX - (editableConfig.amplitudeXMax / 2),
+         - moveY - (editableConfig.amplitudeYMax / 2)
+      );
    }
 
 }
@@ -281,6 +292,7 @@ let gui = new dat.GUI();
 gui.add(editableConfig, "numberOfTowers").min(2).max(100).step(1);
 gui.add(editableConfig, "nbLayers").min(2).max(10).step(1);
 gui.add(editableConfig, "amplitudeXMax").min(0).max(500).step(10);
+gui.add(editableConfig, "amplitudeYMax").min(0).max(500).step(10);
 gui.add(this, "redraw");
 
 redraw();
