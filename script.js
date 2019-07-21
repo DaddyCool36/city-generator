@@ -23,7 +23,6 @@ class Layer {
    // The parameter is the HTML attribute "id" for the canvas.
    constructor(id) {
       this.id = id;
-      //this.backgroundColor = backgroundColor;
    }
 
    // force to add a new canvas tag in the body
@@ -35,7 +34,6 @@ class Layer {
       // default values
       canvasModel.setAttribute("width", "300px");
       canvasModel.setAttribute("height", "300px");
-      //canvasModel.style.backgroundColor = this.backgroundColor;
 
       this.setCanvasFitScreen();
       return document.querySelector("canvas#" + this.id);
@@ -106,7 +104,7 @@ class Tower {
       this.y = this.ctx.canvas.height;
 
       this.hue = randomizeBetween(0, 360);
-      this.fill = "hsl(" + this.hue + "deg, 40%, 20%)";
+      this.fill = "hsl(" + this.hue + "deg, 30%, 10%)";
 
       this.initWindows();
    }
@@ -180,34 +178,78 @@ class Tower {
    }
 }
 
-// the Pencil will draw all the towers in all the layers.
+class Fog {
+
+   // initiate the Fog on the layer
+   constructor(layer) {
+      this.ctx = layer.getContext();
+
+      let hue = 0;
+      let altitude1 = randomizeBetween(0.7, 0.9);
+      let altitude2 = randomizeBetween(0.9, 0.97);
+
+      this.gradient = this.ctx.createLinearGradient(
+            0,
+            0,
+            0,
+            this.ctx.canvas.height);
+      this.gradient.addColorStop(0,          "hsla(" + hue + "deg, 0%, 20%, 0)");
+      this.gradient.addColorStop(0.5,        "hsla(" + hue + "deg, 0%, 20%, 0)");
+      this.gradient.addColorStop(altitude1,  "hsla(" + hue + "deg, 100%, 100%, 0.02)");
+      this.gradient.addColorStop(altitude2,  "hsla(" + hue + "deg, 100%, 100%, 0.1)");
+      this.gradient.addColorStop(1,          "hsla(" + hue + "deg, 100%, 100%, 0.3)");
+
+   }
+
+   // draw the Tower in the context set by the constructor.
+   draw() {
+      this.ctx.fillStyle = this.gradient;
+      this.ctx.fillRect(
+            0,
+            0,
+            this.ctx.canvas.width,
+            this.ctx.canvas.height);
+   }
+}
+
+// the Pencil will draw the towers and the fog alternatively on all the layers.
 class Pencil {
 
    //
    constructor() {
       this.tabTower = [];
+      this.tabFog = [];
       this.tabLayer = [];
    }
 
    // init the towers on the layers
-   init(nbTower = 10) {
+   init(nbTowers = 10) {
 
       this.deleteAllCanvas();
       this.tabTower = [];
+      this.tabFog = [];
       this.tabLayer = [];
 
-      nbTower = Math.floor(nbTower);
+      nbTowers = Math.floor(nbTowers);
 
       this.initLayers(editableConfig.nbLayers);
+      this.initFog();
 
-      this.initAndDistribTowersOnLayers(nbTower, editableConfig.nbLayers);
+      this.initAndDistribTowersOnLayers(nbTowers, editableConfig.nbLayers);
    }
 
    // Init and clean the layers
-   initLayers(nbLayers) {
-      for (let i = 0 ; i < nbLayers ; i ++) {
+   initLayers(nbLayersOfTowers) {
+      for (let i = 0 ; i < (nbLayersOfTowers * 2) ; i ++) {
          this.tabLayer[Number(i)] = new Layer("layer" + i);
          this.tabLayer[Number(i)].clearCanvas();
+      }
+   }
+
+   initFog() {
+      let nbLayersOfFog = this.tabLayer.length / 2;
+      for (let i = 0 ; i < nbLayersOfFog ; i ++) {
+         this.tabFog[Number(i)] = new Fog(this.tabLayer[Number((i * 2) + 1)]);
       }
    }
 
@@ -219,13 +261,14 @@ class Pencil {
       for (let i = 0; i < nbTowers; i++) {
 
          if (i > (nbTowersByLayer * (1 + currentLayerLevel))) {
-            currentLayerLevel++;
+
+            currentLayerLevel++ ;
             if (currentLayerLevel > (nbLayers - 1)) {
                currentLayerLevel = nbLayers - 1;
             }
          }
+         this.tabTower[Number(i)] = new Tower(this.tabLayer[Number(currentLayerLevel * 2)]);
 
-         this.tabTower[Number(i)] = new Tower(this.tabLayer[Number(currentLayerLevel)]);
       }
    }
 
@@ -238,13 +281,17 @@ class Pencil {
       }
    }
 
-   // draw the towers on the layers
+   // draw the layers
    draw() {
       //var ctx = this.layer1.getContext();
 
       for (let i = 0; i < this.tabTower.length; i++) {
          this.tabTower[Number(i)].draw();
          this.tabTower[Number(i)].drawWindows();
+      }
+
+      for (var i = 0; i < this.tabFog.length; i++) {
+         this.tabFog[Number(i)].draw();
       }
    }
 }
