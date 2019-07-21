@@ -323,7 +323,7 @@ function mouseOverMain(event) {
 
 }
 
-function redraw() {
+function reset() {
 
    pen.init(editableConfig.numberOfTowers);
    pen.draw();
@@ -341,6 +341,6 @@ gui.add(editableConfig, "numberOfTowers").min(2).max(100).step(1);
 gui.add(editableConfig, "nbLayers").min(2).max(10).step(1);
 gui.add(editableConfig, "amplitudeXMax").min(0).max(500).step(10);
 gui.add(editableConfig, "amplitudeYMax").min(0).max(500).step(10);
-gui.add(this, "redraw");
+gui.add(this, "reset");
 
 redraw();
