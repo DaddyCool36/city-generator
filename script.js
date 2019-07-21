@@ -104,7 +104,7 @@ class Tower {
       this.y = this.ctx.canvas.height;
 
       this.hue = randomizeBetween(0, 360);
-      this.fill = "hsl(" + this.hue + "deg, 30%, 10%)";
+      this.fill = "hsl(" + this.hue + "deg, 10%, 5%)";
 
       this.initWindows();
    }
@@ -112,7 +112,7 @@ class Tower {
    // init the windows of the tower
    initWindows() {
       this.tabWindows = [];
-      this.windowsFill = "hsl(" + this.hue + "deg, 100%, 80%)";
+      this.windowsFill = "hsl(" + this.hue + "deg, 100%, 90%)";
       this.marginLeftRight = randomizeBetween(2, 10);
       this.marginTop = randomizeBetween(2, 50);
       this.marginBottom = randomizeBetween(2, 5);
@@ -185,7 +185,8 @@ class Fog {
       this.ctx = layer.getContext();
 
       let hue = 0;
-      let altitude1 = randomizeBetween(0.7, 0.9);
+      let altitude0 = randomizeBetween(0.4, 0.6);
+      let altitude1 = randomizeBetween(0.75, 0.9);
       let altitude2 = randomizeBetween(0.9, 0.97);
 
       this.gradient = this.ctx.createLinearGradient(
@@ -194,7 +195,7 @@ class Fog {
             0,
             this.ctx.canvas.height);
       this.gradient.addColorStop(0,          "hsla(" + hue + "deg, 0%, 20%, 0)");
-      this.gradient.addColorStop(0.5,        "hsla(" + hue + "deg, 0%, 20%, 0)");
+      this.gradient.addColorStop(altitude0,  "hsla(" + hue + "deg, 100%, 100%, 0)");
       this.gradient.addColorStop(altitude1,  "hsla(" + hue + "deg, 100%, 100%, 0.02)");
       this.gradient.addColorStop(altitude2,  "hsla(" + hue + "deg, 100%, 100%, 0.1)");
       this.gradient.addColorStop(1,          "hsla(" + hue + "deg, 100%, 100%, 0.3)");
