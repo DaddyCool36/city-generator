@@ -113,7 +113,7 @@ class Tower {
    initWindows() {
       this.tabWindows = [];
       this.windowsFillOn = "hsl(" + this.hue + "deg, 100%, 90%)";
-      this.windowsFillOff = "hsl(" + this.hue + "deg, 30%, 20%)";
+      this.windowsFillOff = "hsl(" + this.hue + "deg, 30%, 10%)";
 
       this.marginLeftRight = randomizeBetween(2, 10);
       this.marginTop = randomizeBetween(2, 50);
