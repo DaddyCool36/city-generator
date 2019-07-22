@@ -112,7 +112,9 @@ class Tower {
    // init the windows of the tower
    initWindows() {
       this.tabWindows = [];
-      this.windowsFill = "hsl(" + this.hue + "deg, 100%, 90%)";
+      this.windowsFillOn = "hsl(" + this.hue + "deg, 100%, 90%)";
+      this.windowsFillOff = "hsl(" + this.hue + "deg, 30%, 20%)";
+
       this.marginLeftRight = randomizeBetween(2, 10);
       this.marginTop = randomizeBetween(2, 50);
       this.marginBottom = randomizeBetween(2, 5);
@@ -127,7 +129,9 @@ class Tower {
       for (let ix = 0 ; ix < this.nbWindowsX ; ix ++) {
          this.tabWindows[Number(ix)] = [];
          for (let jy = 0 ; jy < this.nbWindowsY ; jy ++) {
-            this.tabWindows[Number(ix)][Number(jy)] = true;
+            let windowsSwitch = Math.round(randomizeBetween(0, 1));
+
+            this.tabWindows[Number(ix)][Number(jy)] = (windowsSwitch === 0);
          }
       }
 
@@ -156,7 +160,7 @@ class Tower {
    }
 
    drawWindows() {
-      this.ctx.fillStyle = this.windowsFill;
+      this.ctx.fillStyle = this.windowsFillOn;
 
       let interX = (this.width - (2 * this.marginLeftRight) - (this.windowWidth * this.tabWindows.length)) / (this.tabWindows.length - 1);
       let interY = (this.height - (this.marginTop + this.marginBottom) - (this.windowHeight * this.tabWindows[0].length)) / (this.tabWindows[0].length - 1);
@@ -164,8 +168,11 @@ class Tower {
       for (let ix = 0 ; ix < this.tabWindows.length ; ix ++) {
 
          for (let jy = 0 ; jy < this.tabWindows[Number(ix)].length ; jy ++) {
+
+            this.ctx.fillStyle = this.windowsFillOn;
+
             if (!this.tabWindows[Number(ix)][Number(jy)]) {
-               continue;
+               this.ctx.fillStyle = this.windowsFillOff;
             }
 
             let xWin = this.x + this.marginLeftRight + (ix * (this.windowWidth + interX));
@@ -343,4 +350,4 @@ gui.add(editableConfig, "amplitudeXMax").min(0).max(500).step(10);
 gui.add(editableConfig, "amplitudeYMax").min(0).max(500).step(10);
 gui.add(this, "reset");
 
-redraw();
+reset();
