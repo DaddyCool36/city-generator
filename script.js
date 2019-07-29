@@ -85,6 +85,7 @@ class Tower {
 
    // create a Tower
    constructor(layer) {
+      this.layer = layer;
       this.ctx = layer.getContext();
 
       let margin = editableConfig.amplitudeXMax;
@@ -134,8 +135,9 @@ class Tower {
             this.tabWindows[Number(ix)][Number(jy)] = (windowsSwitch === 0);
          }
       }
-
    }
+
+
 
    // calculate the number of windows to display on X-axis
    calcNbWindowsX( ) {
@@ -165,9 +167,9 @@ class Tower {
       let interX = (this.width - (2 * this.marginLeftRight) - (this.windowWidth * this.tabWindows.length)) / (this.tabWindows.length - 1);
       let interY = (this.height - (this.marginTop + this.marginBottom) - (this.windowHeight * this.tabWindows[0].length)) / (this.tabWindows[0].length - 1);
 
-      for (let ix = 0 ; ix < this.tabWindows.length ; ix ++) {
+      for (let ix = 0, lengthX = this.tabWindows.length ; ix < lengthX ; ix ++) {
 
-         for (let jy = 0 ; jy < this.tabWindows[Number(ix)].length ; jy ++) {
+         for (let jy = 0, lengthY = this.tabWindows[Number(ix)].length ; jy < lengthY ; jy ++) {
 
             this.ctx.fillStyle = this.windowsFillOn;
 
@@ -209,7 +211,7 @@ class Fog {
 
    }
 
-   // draw the Tower in the context set by the constructor.
+   // draw the Fog in the context set by the constructor.
    draw() {
       this.ctx.fillStyle = this.gradient;
       this.ctx.fillRect(
@@ -290,17 +292,37 @@ class Pencil {
    }
 
    // draw the layers
-   draw() {
-      //var ctx = this.layer1.getContext();
+   draw(layerId = null) {
 
       for (let i = 0; i < this.tabTower.length; i++) {
-         this.tabTower[Number(i)].draw();
-         this.tabTower[Number(i)].drawWindows();
+         if (layerId === null ||
+            (layerId !== null && this.tabTower[Number(i)].layer.id === layerId)) {
+            this.tabTower[Number(i)].draw();
+            this.tabTower[Number(i)].drawWindows();
+         }
       }
+   }
 
+   drawFog() {
       for (var i = 0; i < this.tabFog.length; i++) {
          this.tabFog[Number(i)].draw();
       }
+   }
+
+   getRandomTower() {
+      let randomTower = Math.floor(randomizeBetween(0, this.tabTower.length));
+      let myTower = this.tabTower[Number(randomTower)];
+      return myTower;
+   }
+
+   randomLightWindows(myTower) {
+
+      let randomWindowX = Math.floor(randomizeBetween(0, myTower.tabWindows.length));
+      let myWindowsLine = myTower.tabWindows[Number(randomWindowX)];
+      let randomWindowY = Math.floor(randomizeBetween(0, myWindowsLine.length));
+
+      let light = myTower.tabWindows[Number(randomWindowX)][Number(randomWindowY)];
+      myTower.tabWindows[Number(randomWindowX)][Number(randomWindowY)] = !light;
    }
 }
 
@@ -327,13 +349,26 @@ function mouseOverMain(event) {
          - moveY - (editableConfig.amplitudeYMax / 2)
       );
    }
+}
 
+function animate() {
+   let myTower = pen.getRandomTower();
+
+   pen.randomLightWindows(myTower);
+   let layerToRedraw = myTower.layer.id;
+   pen.draw(layerToRedraw);
+
+//   myTower.drawWindows();
+
+   //window.requestAnimationFrame(animate);
 }
 
 function reset() {
 
    pen.init(editableConfig.numberOfTowers);
    pen.draw();
+   pen.drawFog();
+   setInterval(animate, 1000) ;
 
    document
       .querySelector("div#main")
