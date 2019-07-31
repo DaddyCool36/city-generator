@@ -85,6 +85,7 @@ class Tower {
 
    // create a Tower
    constructor(layer) {
+      this.layer = layer;
       this.ctx = layer.getContext();
 
       let margin = editableConfig.amplitudeXMax;
@@ -112,7 +113,9 @@ class Tower {
    // init the windows of the tower
    initWindows() {
       this.tabWindows = [];
-      this.windowsFill = "hsl(" + this.hue + "deg, 100%, 90%)";
+      this.windowsFillOn = "hsl(" + this.hue + "deg, 100%, 90%)";
+      this.windowsFillOff = "hsl(" + this.hue + "deg, 30%, 10%)";
+
       this.marginLeftRight = randomizeBetween(2, 10);
       this.marginTop = randomizeBetween(2, 50);
       this.marginBottom = randomizeBetween(2, 5);
@@ -127,11 +130,14 @@ class Tower {
       for (let ix = 0 ; ix < this.nbWindowsX ; ix ++) {
          this.tabWindows[Number(ix)] = [];
          for (let jy = 0 ; jy < this.nbWindowsY ; jy ++) {
-            this.tabWindows[Number(ix)][Number(jy)] = true;
+            let windowsSwitch = Math.round(randomizeBetween(0, 1));
+
+            this.tabWindows[Number(ix)][Number(jy)] = (windowsSwitch === 0);
          }
       }
-
    }
+
+
 
    // calculate the number of windows to display on X-axis
    calcNbWindowsX( ) {
@@ -156,16 +162,19 @@ class Tower {
    }
 
    drawWindows() {
-      this.ctx.fillStyle = this.windowsFill;
+      this.ctx.fillStyle = this.windowsFillOn;
 
       let interX = (this.width - (2 * this.marginLeftRight) - (this.windowWidth * this.tabWindows.length)) / (this.tabWindows.length - 1);
       let interY = (this.height - (this.marginTop + this.marginBottom) - (this.windowHeight * this.tabWindows[0].length)) / (this.tabWindows[0].length - 1);
 
-      for (let ix = 0 ; ix < this.tabWindows.length ; ix ++) {
+      for (let ix = 0, lengthX = this.tabWindows.length ; ix < lengthX ; ix ++) {
 
-         for (let jy = 0 ; jy < this.tabWindows[Number(ix)].length ; jy ++) {
+         for (let jy = 0, lengthY = this.tabWindows[Number(ix)].length ; jy < lengthY ; jy ++) {
+
+            this.ctx.fillStyle = this.windowsFillOn;
+
             if (!this.tabWindows[Number(ix)][Number(jy)]) {
-               continue;
+               this.ctx.fillStyle = this.windowsFillOff;
             }
 
             let xWin = this.x + this.marginLeftRight + (ix * (this.windowWidth + interX));
@@ -202,7 +211,7 @@ class Fog {
 
    }
 
-   // draw the Tower in the context set by the constructor.
+   // draw the Fog in the context set by the constructor.
    draw() {
       this.ctx.fillStyle = this.gradient;
       this.ctx.fillRect(
@@ -283,17 +292,37 @@ class Pencil {
    }
 
    // draw the layers
-   draw() {
-      //var ctx = this.layer1.getContext();
+   draw(layerId = null) {
 
       for (let i = 0; i < this.tabTower.length; i++) {
-         this.tabTower[Number(i)].draw();
-         this.tabTower[Number(i)].drawWindows();
+         if (layerId === null ||
+            (layerId !== null && this.tabTower[Number(i)].layer.id === layerId)) {
+            this.tabTower[Number(i)].draw();
+            this.tabTower[Number(i)].drawWindows();
+         }
       }
+   }
 
+   drawFog() {
       for (var i = 0; i < this.tabFog.length; i++) {
          this.tabFog[Number(i)].draw();
       }
+   }
+
+   getRandomTower() {
+      let randomTower = Math.floor(randomizeBetween(0, this.tabTower.length));
+      let myTower = this.tabTower[Number(randomTower)];
+      return myTower;
+   }
+
+   randomLightWindows(myTower) {
+
+      let randomWindowX = Math.floor(randomizeBetween(0, myTower.tabWindows.length));
+      let myWindowsLine = myTower.tabWindows[Number(randomWindowX)];
+      let randomWindowY = Math.floor(randomizeBetween(0, myWindowsLine.length));
+
+      let light = myTower.tabWindows[Number(randomWindowX)][Number(randomWindowY)];
+      myTower.tabWindows[Number(randomWindowX)][Number(randomWindowY)] = !light;
    }
 }
 
@@ -320,13 +349,26 @@ function mouseOverMain(event) {
          - moveY - (editableConfig.amplitudeYMax / 2)
       );
    }
-
 }
 
-function redraw() {
+function animate() {
+   let myTower = pen.getRandomTower();
+
+   pen.randomLightWindows(myTower);
+   let layerToRedraw = myTower.layer.id;
+   pen.draw(layerToRedraw);
+
+//   myTower.drawWindows();
+
+   //window.requestAnimationFrame(animate);
+}
+
+function reset() {
 
    pen.init(editableConfig.numberOfTowers);
    pen.draw();
+   pen.drawFog();
+   setInterval(animate, 1000) ;
 
    document
       .querySelector("div#main")
@@ -341,6 +383,6 @@ gui.add(editableConfig, "numberOfTowers").min(2).max(100).step(1);
 gui.add(editableConfig, "nbLayers").min(2).max(10).step(1);
 gui.add(editableConfig, "amplitudeXMax").min(0).max(500).step(10);
 gui.add(editableConfig, "amplitudeYMax").min(0).max(500).step(10);
-gui.add(this, "redraw");
+gui.add(this, "reset");
 
-redraw();
+reset();
