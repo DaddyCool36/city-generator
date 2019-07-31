@@ -29,6 +29,7 @@ var editableConfig = {
    amplitudeXMax : 200,
    amplitudeYMax : 130,
    nbLayers : 6,
+   windowChangeInterval : 1000
 };
 
 /* a Layer is a canvas to draw something on it.
@@ -142,16 +143,18 @@ class Tower {
       let minHeight = this.ctx.canvas.height * 0.25;
       let maxHeight = this.ctx.canvas.height * 0.9;
 
-      this.width = randomizeBetween(minWidth, maxWidth);
-      this.height = randomizeBetween(minHeight, maxHeight);
+      this.width = Math.floor(randomizeBetween(minWidth, maxWidth));
+      this.height = Math.floor(randomizeBetween(minHeight, maxHeight));
 
-      this.x = randomizeBetween(
-         -margin,
-         this.ctx.canvas.width + margin - this.width
+      this.x = Math.floor(
+         randomizeBetween(
+            -margin,
+            this.ctx.canvas.width + margin - this.width
+         )
       );
       this.y = this.ctx.canvas.height;
 
-      this.hue = randomizeBetween(0, 360);
+      this.hue = Math.floor(randomizeBetween(0, 360));
       this.fill = "hsl(" + this.hue + "deg, 10%, 5%)";
 
       this.initWindows();
@@ -166,12 +169,12 @@ class Tower {
       this.windowsFillOn = "hsl(" + this.hue + "deg, 100%, 90%)";
       this.windowsFillOff = "hsl(" + this.hue + "deg, 30%, 10%)";
 
-      this.marginLeftRight = randomizeBetween(2, 10);
-      this.marginTop = randomizeBetween(2, 50);
-      this.marginBottom = randomizeBetween(2, 5);
+      this.marginLeftRight = Math.floor(randomizeBetween(2, 10));
+      this.marginTop = Math.floor(randomizeBetween(2, 50));
+      this.marginBottom = Math.floor(randomizeBetween(2, 5));
 
-      this.windowWidth = randomizeBetween(3, 20);
-      this.windowHeight = randomizeBetween(3, 20);
+      this.windowWidth = Math.floor(randomizeBetween(3, 20));
+      this.windowHeight = Math.floor(randomizeBetween(3, 20));
 
       this.nbWindowsX = this.calcNbWindowsX();
       this.nbWindowsY = this.calcNbWindowsY();
@@ -191,16 +194,23 @@ class Tower {
 
    // calculate the number of windows to display on X-axis
    calcNbWindowsX( ) {
-      let nbWindowsXMin = 2;
       let nbWindowsXMax = Math.floor((this.width - (2 * this.marginLeftRight)) / this.windowWidth);
+      let nbWindowsXMin = Math.floor(nbWindowsXMax / 2);
+      if (nbWindowsXMin < 2) {
+         nbWindowsXMin = 2;
+      }
 
       return Math.floor(randomizeBetween(nbWindowsXMin, nbWindowsXMax));
    }
 
    // calculate the number of windows to display on Y-axis
    calcNbWindowsY() {
-      let nbWindowsYMin = 2;
       let nbWindowsYMax = Math.floor((this.height - this.marginTop - this.marginBottom) / this.windowHeight);
+      let nbWindowsYMin = Math.floor(nbWindowsYMax / 2);
+      if (nbWindowsYMin < 2) {
+         nbWindowsYMin = 2;
+
+      }
 
       return Math.floor(randomizeBetween(nbWindowsYMin, nbWindowsYMax));
    }
@@ -244,9 +254,9 @@ class Fog {
       this.ctx = layer.getContext();
 
       let hue = 0;
-      let altitude0 = randomizeBetween(0.4, 0.6);
-      let altitude1 = randomizeBetween(0.75, 0.9);
-      let altitude2 = randomizeBetween(0.9, 0.97);
+      let altitude0 = randomizeBetween(0.4, 0.6).toFixed(4);
+      let altitude1 = randomizeBetween(0.75, 0.9).toFixed(4);
+      let altitude2 = randomizeBetween(0.9, 0.97).toFixed(4);
 
       this.gradient = this.ctx.createLinearGradient(
             0,
@@ -368,16 +378,16 @@ class Pencil {
    }
 
    getRandomTower() {
-      let randomTower = Math.floor(randomizeBetween(0, this.tabTower.length));
+      let randomTower = Math.round(randomizeBetween(0, this.tabTower.length - 1));
       let myTower = this.tabTower[Number(randomTower)];
       return myTower;
    }
 
    randomLightWindows(myTower) {
 
-      let randomWindowX = Math.floor(randomizeBetween(0, myTower.tabWindows.length));
+      let randomWindowX = Math.round(randomizeBetween(0, myTower.tabWindows.length - 1));
       let myWindowsLine = myTower.tabWindows[Number(randomWindowX)];
-      let randomWindowY = Math.floor(randomizeBetween(0, myWindowsLine.length));
+      let randomWindowY = Math.round(randomizeBetween(0, myWindowsLine.length - 1));
 
       let light = myTower.tabWindows[Number(randomWindowX)][Number(randomWindowY)];
       myTower.tabWindows[Number(randomWindowX)][Number(randomWindowY)] = !light;
@@ -427,7 +437,7 @@ function apply() {
    pen.draw();
    // disable temporarly because of graphical perf
    //pen.drawFog();
-   setInterval(animate, 1000) ;
+   setInterval(animate, editableConfig.windowChangeInterval) ;
 
    document
       .querySelector("div#main")
@@ -442,6 +452,7 @@ gui.add(editableConfig, "numberOfTowers").min(2).max(100).step(1);
 gui.add(editableConfig, "nbLayers").min(2).max(10).step(1);
 gui.add(editableConfig, "amplitudeXMax").min(0).max(500).step(10);
 gui.add(editableConfig, "amplitudeYMax").min(0).max(500).step(10);
+gui.add(editableConfig, "windowChangeInterval").min(1).max(10000).step(1);
 gui.add(this, "apply");
 
 apply();
