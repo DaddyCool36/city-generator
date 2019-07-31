@@ -1,15 +1,29 @@
-/** default constants */
+/** default constants :
+* centerX : the X center of the client window
+* centerY : the Y center of the client window
+*/
 const DEFAULT = {
    centerX : window.innerWidth / 2,
    centerY : window.innerHeight / 2,
 };
 
-/* Return a random value between value1 and value2 */
+/** Return a random value between value1 and value2.
+* There is no ordering value of value1 and value2, the absolute value will be taken.
+* @parameter value1 : number
+* @parameter value2 : number
+* @return numeric: a random value between value1 and value2.
+*/
 function randomizeBetween(value1, value2) {
    return Math.abs(value2 - value1) * Math.random() + value1;
 }
 
-/** default configuration, editable. */
+/** default configuration, editable.
+* numberOfTowers : The number of tower to display, distributed on all layers (canvas)
+* amplitudeXMax : The maximum left/right amplitude the last layer (the most on-top) can be translated
+* amplitudeYMax : The maximum up/down amplitude the last layer (the most on-top) can be translated
+* nbLayers : The number of layers (canvas) of towers to display. Beware : a layer of Fog will be
+         inserted between each layer of tower
+*/
 var editableConfig = {
    numberOfTowers : 40,
    amplitudeXMax : 200,
@@ -17,15 +31,26 @@ var editableConfig = {
    nbLayers : 6,
 };
 
-/* a Layer is a canvas to draw something on it. */
+/* a Layer is a canvas to draw something on it.
+* This "something" can be towers, fog, stuff, silhouettes, etc ...
+* It has a context on which the "something" will be drawn.
+*/
 class Layer {
 
-   // The parameter is the HTML attribute "id" for the canvas.
+   /** Constructor of the Layer.
+   * @parameter id : string or number, the unique id of the layer to display, this id
+   * will be inserted in the #id attribute of the canvas tag.
+   */
    constructor(id) {
       this.id = id;
    }
 
-   // force to add a new canvas tag in the body
+   /** generate a new canvas in the DOM.
+   * This canvas will be inserted in the div#main (appendChild).
+   * By default, it will be 300px wide and 300px high.
+   * Then, the canvas will fit the screen size of the window.
+   * @return : the inner DOM canvas just generated.
+   */
    generateCanvas() {
       let canvasModel = document.createElement("canvas");
       let mainDiv = document.querySelector("div#main");
@@ -39,7 +64,9 @@ class Layer {
       return document.querySelector("canvas#" + this.id);
    }
 
-   // get the actual canvas. It generates it if it doesn't exist.
+   /** Get the canvas of the layer. It generates it if it doesn't exist.
+   * @return The cinner DOM canvas of the layer.
+   */
    getCanvas() {
       let canvas = document.querySelector("canvas#" + this.id);
       if (canvas == null) {
@@ -48,12 +75,16 @@ class Layer {
       return canvas;
    }
 
-   // Get the 2D context of the actual canvas
+   /** Get the 2D context of the canvas of the layer
+   * @return the context 2D of the canvas.
+   */
    getContext() {
       return this.getCanvas().getContext("2d");
    }
 
-   // Force the canvas to resize it to fit screen dimensions (window)
+   /** Force the dimensions of the canvas to fit window dimensions
+   * The canvas is centered in the window, according to the amplitudeXMax and amplitudeYMax of the config.
+   */
    setCanvasFitScreen() {
       let myCanvas = this.getContext().canvas;
       myCanvas.width = window.innerWidth + editableConfig.amplitudeXMax;
@@ -62,7 +93,8 @@ class Layer {
       myCanvas.style.top = (-editableConfig.amplitudeYMax / 2) + "px";
    }
 
-   // Clear the canvas
+   /** Clear the entire canvas
+   */
    clearCanvas() {
       let myContext = this.getContext();
       myContext.clearRect(
@@ -72,7 +104,10 @@ class Layer {
          myContext.canvas.height);
       }
 
-   // Move the canvas to the new position
+   /** Translate the canvas to the new position.
+   * @parameter newX (integer): the new X position (in pixels) of the Layer.
+   * @parameter newY (integer): the new Y position (in pixels) of the Layer.
+   */
    translateCanvas(newX, newY) {
       let myCanvas = this.getContext().canvas;
       myCanvas.style.left = newX + "px";
@@ -80,10 +115,22 @@ class Layer {
    }
 }
 
-// A tower is a rectangle-shape-building with windows.
+/**
+* A tower is a city building. It needs a canvas context to be drawn.
+* It has windows.
+*/
 class Tower {
 
-   // create a Tower
+   /** Constructor of Tower. The layer parameter will be used to draw the tower.
+   * By default the Tower will be randomly rendered with this values :
+   * - width : between 50 and 200
+   * - Height : between 25% and 90% of the canvas height.
+   * - x position: all along the width of the canvas
+   * - color of the Tower : a very dark color
+   * The y position will be static : the bottom of the Tower is at the bottom of the canvas
+   * The windows are initialized too.
+   * @parameter layer: The Layer Object on which the Tower will be drawn.
+   */
    constructor(layer) {
       this.layer = layer;
       this.ctx = layer.getContext();
@@ -92,7 +139,7 @@ class Tower {
 
       let minWidth = 50;
       let maxWidth = 200;
-      let minHeight = this.ctx.canvas.height / 4;
+      let minHeight = this.ctx.canvas.height * 0.25;
       let maxHeight = this.ctx.canvas.height * 0.9;
 
       this.width = randomizeBetween(minWidth, maxWidth);
@@ -110,7 +157,10 @@ class Tower {
       this.initWindows();
    }
 
-   // init the windows of the tower
+   /** init the windows of the tower.
+   * By default the Windows will be randomly rendered with this values :
+   * - number of windows on X-axis : between 2 and
+   */
    initWindows() {
       this.tabWindows = [];
       this.windowsFillOn = "hsl(" + this.hue + "deg, 100%, 90%)";
@@ -243,14 +293,18 @@ class Pencil {
       nbTowers = Math.floor(nbTowers);
 
       this.initLayers(editableConfig.nbLayers);
-      this.initFog();
+      //this.initFog();
 
       this.initAndDistribTowersOnLayers(nbTowers, editableConfig.nbLayers);
+
+      let nbLayers = this.tabLayer.length;
+      this.tabLayer[Number(nbLayers)] = new Layer("layer" + nbLayers);
+      this.tabLayer[Number(nbLayers)].clearCanvas();
    }
 
    // Init and clean the layers
    initLayers(nbLayersOfTowers) {
-      for (let i = 0 ; i < (nbLayersOfTowers * 2) ; i ++) {
+      for (var i = 0 ; i < (nbLayersOfTowers * 2) ; i ++) {
          this.tabLayer[Number(i)] = new Layer("layer" + i);
          this.tabLayer[Number(i)].clearCanvas();
       }
@@ -309,6 +363,10 @@ class Pencil {
       }
    }
 
+   drawSilhouettes() {
+
+   }
+
    getRandomTower() {
       let randomTower = Math.floor(randomizeBetween(0, this.tabTower.length));
       let myTower = this.tabTower[Number(randomTower)];
@@ -363,11 +421,12 @@ function animate() {
    //window.requestAnimationFrame(animate);
 }
 
-function reset() {
+function apply() {
 
    pen.init(editableConfig.numberOfTowers);
    pen.draw();
-   pen.drawFog();
+   // disable temporarly because of graphical perf
+   //pen.drawFog();
    setInterval(animate, 1000) ;
 
    document
@@ -383,6 +442,6 @@ gui.add(editableConfig, "numberOfTowers").min(2).max(100).step(1);
 gui.add(editableConfig, "nbLayers").min(2).max(10).step(1);
 gui.add(editableConfig, "amplitudeXMax").min(0).max(500).step(10);
 gui.add(editableConfig, "amplitudeYMax").min(0).max(500).step(10);
-gui.add(this, "reset");
+gui.add(this, "apply");
 
-reset();
+apply();
