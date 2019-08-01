@@ -118,7 +118,8 @@ class Layer {
 
 /**
 * A tower is a city building. It needs a canvas context to be drawn.
-* It has windows.
+* It is randomly generated (dimensions, colors, position).
+* It has randomly generated windows.
 */
 class Tower {
 
@@ -192,7 +193,11 @@ class Tower {
 
 
 
-   // calculate the number of windows to display on X-axis
+   /** calculate the number of windows to display on X-axis. This number is a
+   * random number between 2 and the maximum number of windows to fill the width
+   * of the Tower without superposition.
+   * @return integer a randomly generated number of windows.
+   */
    calcNbWindowsX( ) {
       let nbWindowsXMax = Math.floor((this.width - (2 * this.marginLeftRight)) / this.windowWidth);
       let nbWindowsXMin = Math.floor(nbWindowsXMax / 2);
@@ -200,10 +205,14 @@ class Tower {
          nbWindowsXMin = 2;
       }
 
-      return Math.floor(randomizeBetween(nbWindowsXMin, nbWindowsXMax));
+      return Math.round(randomizeBetween(nbWindowsXMin, nbWindowsXMax));
    }
 
-   // calculate the number of windows to display on Y-axis
+   /** calculate the number of windows to display on Y-axis. This number is a
+   * random number between 2 and the maximum number of windows to fill the height
+   * of the Tower without superposition.
+   * @return integer a randomly generated number of windows.
+   */
    calcNbWindowsY() {
       let nbWindowsYMax = Math.floor((this.height - this.marginTop - this.marginBottom) / this.windowHeight);
       let nbWindowsYMin = Math.floor(nbWindowsYMax / 2);
@@ -215,12 +224,16 @@ class Tower {
       return Math.floor(randomizeBetween(nbWindowsYMin, nbWindowsYMax));
    }
 
-   // draw the Tower in the context set by the constructor.
+   /** draw the Tower in the context set by the constructor.
+   */
    draw() {
       this.ctx.fillStyle = this.fill;
       this.ctx.fillRect(this.x, this.y, this.width, -this.height);
    }
 
+   /** Draw the windows of the Tower. The windows are distributed by their number
+   * Of Towers to fill the width and height of the Tower.
+   */
    drawWindows() {
       this.ctx.fillStyle = this.windowsFillOn;
 
@@ -247,9 +260,15 @@ class Tower {
    }
 }
 
+/** A Fog is linear gradient to simulate a layer of pollution, city lights, and
+* depth of field of the differents Towers in the background.
+*/
 class Fog {
 
-   // initiate the Fog on the layer
+   /** initiate the Fog on the layer.
+   * The differents altitudes of the Fog are randomly distributed.
+   * @parameter layer : The layer to draw the Fog on.
+   */
    constructor(layer) {
       this.ctx = layer.getContext();
 
@@ -271,7 +290,8 @@ class Fog {
 
    }
 
-   // draw the Fog in the context set by the constructor.
+   /** draw the Fog in the context set by the constructor.
+   */
    draw() {
       this.ctx.fillStyle = this.gradient;
       this.ctx.fillRect(
@@ -282,17 +302,22 @@ class Fog {
    }
 }
 
-// the Pencil will draw the towers and the fog alternatively on all the layers.
+/** the Pencil will draw all the elements (Towers, Fog, ...) on all the layers.
+*/
 class Pencil {
 
-   //
+   /** Constructor of the Pencil.
+   * It initiate arrays of Towers, Fogs and Layers.
+   */
    constructor() {
       this.tabTower = [];
       this.tabFog = [];
       this.tabLayer = [];
    }
 
-   // init the towers on the layers
+   /** Init all the elements and the layers. The elements will be drawn on the Layers.
+   * @parameter nbTowers : integer (Default 10): The number of Towers to create.
+   */
    init(nbTowers = 10) {
 
       this.deleteAllCanvas();
@@ -312,7 +337,8 @@ class Pencil {
       this.tabLayer[Number(nbLayers)].clearCanvas();
    }
 
-   // Init and clean the layers
+   /** Init and clean all the layers
+   */
    initLayers(nbLayersOfTowers) {
       for (var i = 0 ; i < (nbLayersOfTowers * 2) ; i ++) {
          this.tabLayer[Number(i)] = new Layer("layer" + i);
