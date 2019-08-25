@@ -332,6 +332,7 @@ class Pencil {
 
       this.initAndDistribTowersOnLayers(nbTowers, editableConfig.nbLayers);
 
+      // the layer of silhouettes
       let nbLayers = this.tabLayer.length;
       this.tabLayer[Number(nbLayers)] = new Layer("layer" + nbLayers);
       this.tabLayer[Number(nbLayers)].clearCanvas();
